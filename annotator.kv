@@ -1,0 +1,18 @@
+#:kivy 1.9.0
+
+<ImageDisplay>
+    Image:
+        id: left_image
+        size: 320, 240
+        pos: 150, 560
+        source: root.left_image()
+    Image:
+        id: right_image
+        size: 320, 240
+        pos: 550, 560
+        source: root.right_image()
+    BorderDrawer:
+        id: depth_image
+        size: 320, 240
+        pos: 950, 560
+        source: root.depth_image()

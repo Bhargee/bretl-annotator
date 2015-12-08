@@ -6,13 +6,76 @@
         size: 320, 240
         pos: 150, 560
         source: root.left_image()
+
     Image:
         id: right_image
         size: 320, 240
         pos: 550, 560
         source: root.right_image()
+
     BorderDrawer:
         id: depth_image
         size: 320, 240
         pos: 950, 560
         source: root.depth_image()
+
+    Label:
+        text: 'Grip'
+        pos: 200, 400
+        font_size: '30sp'
+
+    GridLayout:
+        cols: 2
+        spacing: 20
+        pos: 200,300
+
+        Label:
+            text: "Power"
+        CheckBox:
+            group: 'grip'
+            id: power
+        Label:
+            text: "Tool"
+        CheckBox:
+            group: 'grip'
+            id: tool
+        Label:
+            text: "3 Jaw Chuck"
+        CheckBox:
+            group: 'grip'
+            id: tjc
+        Label:
+            text: "Pinch"
+        CheckBox:
+            group: 'grip'
+            id: pinch
+        Label:
+            text: "Key"
+        CheckBox:
+            group: 'grip'
+            id: key
+
+    Button:
+        pos: 650,10
+        text: "Save Annotations"
+        size: 150,50
+        on_press: root.save_annotations()
+
+    Label:
+        text: "Comments"
+        pos: 400,400
+        font_size: '30sp'
+    TextInput:
+        id: comments
+        pos: 370, 300
+        size: 500, 100
+
+    Label:
+        text: "Instructions"
+        pos: 1000, 400
+        font_size: '30sp'
+    Label:
+        text: root._instructions_text
+        pos: 1050, 300
+        size_hint_y: None
+        text_size: 300, None

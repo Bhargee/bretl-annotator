@@ -116,11 +116,11 @@ class ImageDisplay(Widget):
 
         # clear annotations from GUI
         self.ids.comments.text = ""
-        self.ids.power.active = False
-        self.ids.tool.active = False
-        self.ids.tjc.active = False
-        self.ids.pinch.active = False
-        self.ids.key.active = False
+        self.ids.power.state = 'normal'
+        self.ids.tool.state = 'normal'
+        self.ids.tjc.state = 'normal'
+        self.ids.pinch.state = 'normal'
+        self.ids.key.state = 'normal'
 
         # if previously annotated, load old annotations
         self._load_old_annotation()
@@ -135,15 +135,15 @@ class ImageDisplay(Widget):
         if handle not in self.annotations.keys():
             self.annotations[handle] = dict()
         grip = 'None'
-        if self.ids.power.active:
+        if self.ids.power.state == 'down':
             grip = 'power'
-        elif self.ids.tool.active:
+        elif self.ids.tool.state == 'down':
             grip = 'tool'
-        elif self.ids.tjc.active:
+        elif self.ids.tjc.state == 'down':
             grip = '3 jaw chuck'
-        elif self.ids.pinch.active:
+        elif self.ids.pinch.state == 'down':
             grip = 'pinch'
-        elif self.ids.key.active:
+        elif self.ids.key.state == 'down':
             grip = 'key'
         self.annotations[handle]['grip'] = grip
 
@@ -164,15 +164,15 @@ class ImageDisplay(Widget):
             self.ids.comments.text = self.annotations[handle]['comment']
             old_grip = self.annotations[handle]['grip']
             if old_grip == 'power':
-                self.ids.power.active = True
+                self.ids.power.state = 'down'
             elif old_grip == 'tool':
-                self.ids.tool.active = True
+                self.ids.tool.state = 'down'
             elif old_grip == '3 jaw chuck':
-                self.ids.tjc.active = True
+                self.ids.tjc.state = 'down'
             elif old_grip == 'pinch':
-                self.ids.pinch.active = True
+                self.ids.pinch.state = 'down'
             elif old_grip == 'key':
-                self.ids.key.active = True
+                self.ids.key.state = 'down'
 
 if __name__ == '__main__':
     parser = OptionParser()

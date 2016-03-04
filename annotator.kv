@@ -9,39 +9,40 @@
 
     Label:
         text: 'Grip'
-        pos: 200, 200
+        pos: 200, 550
         font_size: '30sp'
 
-    GridLayout:
-        cols: 2
-        spacing: 20
-        pos: 200,100
-
-        Label:
-            text: "Power"
-        CheckBox:
+        ToggleButton:
+            text: "power"
             group: 'grip'
             id: power
-        Label:
-            text: "Tool"
-        CheckBox:
+            pos:200, 500
+            size: 150, 50
+
+        ToggleButton:
+            text: "tool"
             group: 'grip'
             id: tool
-        Label:
-            text: "3 Jaw Chuck"
-        CheckBox:
+            pos: 200, 450
+            size: 150, 50
+        ToggleButton:
+            text: "3 jc"
             group: 'grip'
             id: tjc
-        Label:
-            text: "Pinch"
-        CheckBox:
+            pos: 200, 400
+            size: 150, 50
+        ToggleButton:
+            text: "pinch"
             group: 'grip'
             id: pinch
-        Label:
-            text: "Key"
-        CheckBox:
+            pos: 200, 350
+            size: 150, 50
+        ToggleButton:
+            text: "key"
             group: 'grip'
             id: key
+            pos: 200, 300
+            size: 150,50
 
     Button:
         pos: 650,10
@@ -67,3 +68,9 @@
         pos: 1100, 100
         size_hint_y: None
         text_size: 300, None
+
+    Label:
+        text: root.progress
+        pos: 1400, 50
+        size_hint_y: None
+        text_size: 400, None

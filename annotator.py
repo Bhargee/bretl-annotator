@@ -1,6 +1,5 @@
 #!/usr/bin/python
 ## TODO
-# * move to relative layout
 
 import kivy
 kivy.require('1.9.0')
@@ -71,9 +70,8 @@ class ImageDisplay(Widget):
         self._keyboard.bind(on_key_down=self._on_keyboard_down)
         self.im_idx = 0
 
-        old_annotation_fname = join(options.output_dir, "annotations.json")
-        if exists(old_annotation_fname):
-            with open(old_annotation_fname, 'r') as old_annotations:
+        if exists(options.output_file):
+            with open(options.output_file, 'r') as old_annotations:
                 self.annotations = json.load(old_annotations)
         else:
             self.annotations = dict()
@@ -147,8 +145,7 @@ class ImageDisplay(Widget):
         self.annotations[handle]['comment'] = self.ids.comments.text
 
     def save_annotations(self):
-        outfile_name = options.output_dir + 'annotations.json'
-        with open(outfile_name, 'w') as outfile:
+        with open(options.output_file, 'w') as outfile:
             json.dump(self.annotations, outfile)
 
     def _get_handle(self):
@@ -176,16 +173,14 @@ if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option('--imdir', '-i', dest='imdir',
             help='location of images')
-    parser.add_option('--output-dir', '-o', dest='output_dir',
-            help='location where app output files should go')
+    parser.add_option('--output-file', '-o', dest='output_file',
+            help='path for output file')
 
     (options, args) = parser.parse_args()
-    if options.imdir is None or options.output_dir is None:
+    if options.imdir is None or options.output_file is None:
         print 'Must start with image directory and output directory args'
         sys.exit(1)
     if options.imdir[-1] is not '/':
         options.imdir += '/'
-    if options.output_dir is not '/':
-        options.output_dir += '/'
 
     AnnotatorApp().run()

@@ -16,7 +16,7 @@ from kivy.uix.checkbox import CheckBox
 from kivy.graphics import Color, Line
 from kivy.graphics.instructions import InstructionGroup
 
-from kivy.properties import ListProperty, NumericProperty
+from kivy.properties import NumericProperty, StringProperty
 
 from kivy.core.window import Window
 
@@ -63,12 +63,14 @@ class AnnotatorApp(App):
 class ImageDisplay(Widget):
     _instructions_text = ("After "
                          "selecting a grip, hit the right and left arrow keys to move on or see an old image")
+    progress = StringProperty()
 
     def __init__(self, **kwargs):
         self.image_list = self._get_files()
         self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         self._keyboard.bind(on_key_down=self._on_keyboard_down)
         self.im_idx = 0
+        self.progress = ("%s/%s" % (self.im_idx+1, len(self.image_list)) )
 
         if exists(options.output_file):
             with open(options.output_file, 'r') as old_annotations:
@@ -108,6 +110,9 @@ class ImageDisplay(Widget):
             self.im_idx -= 1
         elif keycode[1] == 'right':
             self.im_idx += 1
+
+        # update progress
+        self.progress = "%s/%s" % (self.im_idx+1, len(self.image_list))
 
         # clear annotations from GUI
         self.ids.comments.text = ""

@@ -2,32 +2,20 @@
 
 <ImageDisplay>
     Image:
-        id: left_image
-        size: 320, 240
-        pos: 150, 560
-        source: root.left_image()
-
-    Image:
-        id: right_image
-        size: 320, 240
-        pos: 550, 560
-        source: root.right_image()
-
-    BorderDrawer:
-        id: depth_image
-        size: 320, 240
-        pos: 950, 560
-        source: root.depth_image()
+        id: curr_image
+        size: 640, 480
+        pos: 450, 300
+        source: root.curr_image()
 
     Label:
         text: 'Grip'
-        pos: 200, 400
+        pos: 200, 200
         font_size: '30sp'
 
     GridLayout:
         cols: 2
         spacing: 20
-        pos: 200,300
+        pos: 200,100
 
         Label:
             text: "Power"
@@ -63,19 +51,19 @@
 
     Label:
         text: "Comments"
-        pos: 400,400
+        pos: 400,200
         font_size: '30sp'
     TextInput:
         id: comments
-        pos: 370, 300
+        pos: 370, 100
         size: 500, 100
 
     Label:
         text: "Instructions"
-        pos: 1000, 400
+        pos: 1040, 200
         font_size: '30sp'
     Label:
         text: root._instructions_text
-        pos: 1050, 300
+        pos: 1100, 100
         size_hint_y: None
         text_size: 300, None

@@ -121,6 +121,7 @@ class ImageDisplay(Widget):
         self.ids.tjc.state = 'normal'
         self.ids.pinch.state = 'normal'
         self.ids.key.state = 'normal'
+        self.ids.discard.state = 'normal'
 
         # if previously annotated, load old annotations
         self._load_old_annotation()
@@ -149,6 +150,11 @@ class ImageDisplay(Widget):
 
         self.annotations[handle]['comment'] = self.ids.comments.text
 
+        if self.ids.discard.state == 'down':
+            self.annotations[handle]['use'] = False
+        else:
+            self.annotations[handle]['use'] = True
+
     def save_annotations(self):
         with open(options.output_file, 'w') as outfile:
             json.dump(self.annotations, outfile)
@@ -173,6 +179,10 @@ class ImageDisplay(Widget):
                 self.ids.pinch.state = 'down'
             elif old_grip == 'key':
                 self.ids.key.state = 'down'
+
+            if "use" in self.annotations[handle].keys():
+                if not self.annotations[handle]["use"]:
+                    self.ids.discard.state = 'down'
 
 if __name__ == '__main__':
     parser = OptionParser()

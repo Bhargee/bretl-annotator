@@ -1,5 +1,4 @@
 #!/usr/bin/python
-## TODO
 
 import kivy
 kivy.require('1.9.0')
@@ -13,18 +12,18 @@ from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.checkbox import CheckBox
 
-from kivy.graphics import Color, Line
+from kivy.graphics import Color, Line, Point
 from kivy.graphics.instructions import InstructionGroup
 
 from kivy.properties import NumericProperty, StringProperty
 
 from kivy.core.window import Window
 
-# for exiting, parsing cmd args, and creating imdir/oitputdir structures
+# for exiting, parsing cmd args, and creating imdir/outputdir structures
 import sys
 from optparse import OptionParser
 from glob import glob
-from os.path import join, exists
+from os.path import join, exists, basename
 import json
 
 # for saving
@@ -61,8 +60,6 @@ class AnnotatorApp(App):
         self.icon = 'hand-icon.png'
 
 class ImageDisplay(Widget):
-    _instructions_text = ("After "
-                         "selecting a grip, hit the right and left arrow keys to move on or see an old image")
     progress = StringProperty()
 
     def __init__(self, **kwargs):
@@ -74,6 +71,7 @@ class ImageDisplay(Widget):
 
         if exists(options.output_file):
             with open(options.output_file, 'r') as old_annotations:
+                exit(3)
                 self.annotations = json.load(old_annotations)
         else:
             self.annotations = dict()
@@ -114,15 +112,6 @@ class ImageDisplay(Widget):
         # update progress
         self.progress = "%s/%s" % (self.im_idx+1, len(self.image_list))
 
-        # clear annotations from GUI
-        self.ids.comments.text = ""
-        self.ids.power.state = 'normal'
-        self.ids.tool.state = 'normal'
-        self.ids.tjc.state = 'normal'
-        self.ids.pinch.state = 'normal'
-        self.ids.key.state = 'normal'
-        self.ids.discard.state = 'normal'
-
         # if previously annotated, load old annotations
         self._load_old_annotation()
         # display new image
@@ -132,57 +121,36 @@ class ImageDisplay(Widget):
         return self.image_list[self.im_idx]
 
     def record_annotation(self):
-        handle = self._get_handle()
-        if handle not in self.annotations.keys():
-            self.annotations[handle] = dict()
-        grip = 'None'
-        if self.ids.power.state == 'down':
-            grip = 'power'
-        elif self.ids.tool.state == 'down':
-            grip = 'tool'
-        elif self.ids.tjc.state == 'down':
-            grip = '3 jaw chuck'
-        elif self.ids.pinch.state == 'down':
-            grip = 'pinch'
-        elif self.ids.key.state == 'down':
-            grip = 'key'
-        self.annotations[handle]['grip'] = grip
-
-        self.annotations[handle]['comment'] = self.ids.comments.text
-
-        if self.ids.discard.state == 'down':
-            self.annotations[handle]['use'] = False
-        else:
-            self.annotations[handle]['use'] = True
+        im_name = basename(self.ids.curr_image.source)
+        self.annotations[im_name] = self.ids.curr_image.quad_points()
 
     def save_annotations(self):
         with open(options.output_file, 'w') as outfile:
-            json.dump(self.annotations, outfile)
+            annotation_str = '\n'.join(['%s-%s'%(name, str(points)[1:-1]) for
+                                name, points in self.annotations.iteritems()])
+            outfile.write(annotation_str)
 
-    def _get_handle(self):
-        im_name = self.curr_image()
-        handle = im_name[im_name.rfind('/') + 1:]
-        return handle
+    def _load_old_annotation(self, filename):
+        with open(filename, 'r') as old_anno:
+            pass
 
-    def _load_old_annotation(self):
-        handle = self._get_handle()
-        if handle in self.annotations.keys():
-            self.ids.comments.text = self.annotations[handle]['comment']
-            old_grip = self.annotations[handle]['grip']
-            if old_grip == 'power':
-                self.ids.power.state = 'down'
-            elif old_grip == 'tool':
-                self.ids.tool.state = 'down'
-            elif old_grip == '3 jaw chuck':
-                self.ids.tjc.state = 'down'
-            elif old_grip == 'pinch':
-                self.ids.pinch.state = 'down'
-            elif old_grip == 'key':
-                self.ids.key.state = 'down'
-
-            if "use" in self.annotations[handle].keys():
-                if not self.annotations[handle]["use"]:
-                    self.ids.discard.state = 'down'
+class QuadDrawer(Image):
+    def __init__(self, **kwargs):
+        super(QuadDrawer, self).__init__(**kwargs)
+        self.points = []
+    
+    def on_touch_down(self, touch):
+        if not self.collide_point(*touch.pos):
+            return
+        if len(self.points) == 4:
+            return
+        with self.canvas:
+            Color(0,0,0)
+            self.points.append((touch.x, touch.y))
+            Point(points=(touch.x, touch.y), pointsize=6)
+    def quad_points(self):
+        # returns flattened list of points
+        return list(sum(self.points, ()))
 
 if __name__ == '__main__':
     parser = OptionParser()

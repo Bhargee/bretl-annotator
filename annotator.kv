@@ -1,86 +1,20 @@
 #:kivy 1.9.0
 
 <ImageDisplay>
-    Image:
+    QuadDrawer:
         id: curr_image
-        size: 640, 480
-        pos: 450, 300
+        size: 752, 480
+        pos: 350, 300
         source: root.curr_image()
 
-    Label:
-        text: 'Grip'
-        pos: 200, 550
-        font_size: '30sp'
-
-    ToggleButton:
-        text: "power"
-        group: 'grip'
-        id: power
-        pos:200, 500
-        size: 150, 50
-
-    ToggleButton:
-        text: "tool"
-        group: 'grip'
-        id: tool
-        pos: 200, 450
-        size: 150, 50
-    ToggleButton:
-        text: "3 jc"
-        group: 'grip'
-        id: tjc
-        pos: 200, 400
-        size: 150, 50
-    ToggleButton:
-        text: "pinch"
-        group: 'grip'
-        id: pinch
-        pos: 200, 350
-        size: 150, 50
-    ToggleButton:
-        text: "key"
-        group: 'grip'
-        id: key
-        pos: 200, 300
-        size: 150,50
-
     Button:
-        pos: 650,10
+        pos: 550,10
         text: "Save Annotations"
         size: 150,50
         on_press: root.save_annotations()
 
     Label:
-        text: "Comments"
-        pos: 400,200
-        font_size: '30sp'
-    TextInput:
-        id: comments
-        pos: 370, 100
-        size: 500, 100
-
-    Label:
-        text: "Instructions"
-        pos: 1040, 200
-        font_size: '30sp'
-    Label:
-        text: root._instructions_text
-        pos: 1100, 100
-        size_hint_y: None
-        text_size: 300, None
-
-    Label:
         text: root.progress
-        pos: 1400, 50
+        pos: 1300, 50
         size_hint_y: None
         text_size: 400, None
-
-    Label:
-        text: "Discard Image?"
-        pos: 350, 200
-        size_hint_y: None
-        text_size: 400, None
-    CheckBox:
-        pos: 200, 170
-        id: discard
-

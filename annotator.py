@@ -79,7 +79,6 @@ class ImageDisplay(Widget):
         if first_image in self.annotations.keys():
             self.ids.curr_image.reset(self.annotations[first_image])
 
-
     def _get_files(self):
         filenames = sorted(glob(join(options.imdir, '*')))
         return filenames
@@ -90,7 +89,8 @@ class ImageDisplay(Widget):
     def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
         if keycode[1] == "e":
             for _ in range(2):
-                self.ids.curr_image.points.pop()
+                if len(self.ids.curr_image.points) > 0:
+                    self.ids.curr_image.points.pop()
         self.ids.curr_image.reset(self.ids.curr_image.points)
 
 
@@ -136,9 +136,10 @@ class ImageDisplay(Widget):
             full_annotations = filter(
                     lambda (name, points): len(points) > 0,
                     self.annotations.iteritems())
-            annotation_str = '\n'.join(['%s-%s'%(name, str(points)[1:-1]) for
-                                name, points in full_annotations])
-            outfile.write(annotation_str)
+
+            for name, points in full_annotations:
+                points = map(lambda coord: coord - 300, points)
+                outfile.write('%s-%s\n'%(name, str(points)[1:-1]))
 
     def load_old_annotations(self):
         annotations = {}
@@ -146,7 +147,7 @@ class ImageDisplay(Widget):
             lines = old_anno.readlines()
             for line in lines:
                 name, coords = line.split('-')
-                annotations[name] = map(lambda c: float(c), coords.split(','))
+                annotations[name] = map(lambda c: float(c)+300, coords.split(','))
         return annotations
 
 class QuadDrawer(Image):

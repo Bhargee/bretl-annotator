@@ -12,7 +12,7 @@ from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.checkbox import CheckBox
 
-from kivy.graphics import Color, Line, Point
+from kivy.graphics import Color, Line, Ellipse
 from kivy.graphics.instructions import InstructionGroup
 
 from kivy.properties import NumericProperty, StringProperty
@@ -63,33 +63,37 @@ class ImageDisplay(Widget):
     progress = StringProperty()
 
     def __init__(self, **kwargs):
-        self.image_list = self._get_files()
+        self.image_list = self._get_files() # collect all image files
         self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         self._keyboard.bind(on_key_down=self._on_keyboard_down)
         self.im_idx = 0
         self.progress = ("%s/%s" % (self.im_idx+1, len(self.image_list)) )
 
+        self.annotations = dict()
         if exists(options.output_file):
-            with open(options.output_file, 'r') as old_annotations:
-                exit(3)
-                self.annotations = json.load(old_annotations)
-        else:
-            self.annotations = dict()
+            self.annotations = self.load_old_annotations()
 
         super(ImageDisplay, self).__init__(**kwargs)
-        self._load_old_annotation()
+
+        first_image = basename(self.curr_image())
+        if first_image in self.annotations.keys():
+            self.ids.curr_image.reset(self.annotations[first_image])
+
 
     def _get_files(self):
-        filenames = sorted(glob(join(options.imdir, '*.png')))
+        filenames = sorted(glob(join(options.imdir, '*')))
         return filenames
 
     def _keyboard_closed(self):
         pass
-        #self._keyboard.unbind(on_key_down=self._on_keyboard_down)
-        #self._keyboard = None
 
     def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
-        # only deal with arrow keys
+        if keycode[1] == "e":
+            for _ in range(2):
+                self.ids.curr_image.points.pop()
+        self.ids.curr_image.reset(self.ids.curr_image.points)
+
+
         if keycode[1] != "left" and keycode[1] != "right":
             return
 
@@ -99,9 +103,9 @@ class ImageDisplay(Widget):
         elif self.im_idx == len(self.image_list)-1 and keycode[1] == 'right':
             return
 
-        # save current annotations
+        # add annotation to data structure (save when hitting 'save
+        # annotations')
         self.record_annotation()
-        self.save_annotations()
 
         # change index
         if keycode[1] == 'left':
@@ -112,45 +116,74 @@ class ImageDisplay(Widget):
         # update progress
         self.progress = "%s/%s" % (self.im_idx+1, len(self.image_list))
 
-        # if previously annotated, load old annotations
-        self._load_old_annotation()
         # display new image
         self.ids.curr_image.source = self.curr_image()
+        next_image = basename(self.ids.curr_image.source)
+        if next_image in self.annotations.keys():
+            self.ids.curr_image.reset(self.annotations[next_image])
+        else:
+            self.ids.curr_image.reset([])
 
     def curr_image(self):
         return self.image_list[self.im_idx]
 
     def record_annotation(self):
         im_name = basename(self.ids.curr_image.source)
-        self.annotations[im_name] = self.ids.curr_image.quad_points()
+        self.annotations[im_name] = self.ids.curr_image.points
 
     def save_annotations(self):
         with open(options.output_file, 'w') as outfile:
+            full_annotations = filter(
+                    lambda (name, points): len(points) > 0,
+                    self.annotations.iteritems())
             annotation_str = '\n'.join(['%s-%s'%(name, str(points)[1:-1]) for
-                                name, points in self.annotations.iteritems()])
+                                name, points in full_annotations])
             outfile.write(annotation_str)
 
-    def _load_old_annotation(self, filename):
-        with open(filename, 'r') as old_anno:
-            pass
+    def load_old_annotations(self):
+        annotations = {}
+        with open(options.output_file, 'r') as old_anno:
+            lines = old_anno.readlines()
+            for line in lines:
+                name, coords = line.split('-')
+                annotations[name] = map(lambda c: float(c), coords.split(','))
+        return annotations
 
 class QuadDrawer(Image):
     def __init__(self, **kwargs):
         super(QuadDrawer, self).__init__(**kwargs)
         self.points = []
+        self.canvas_points = []
+        self.d = 10
     
     def on_touch_down(self, touch):
         if not self.collide_point(*touch.pos):
             return
-        if len(self.points) == 4:
+        if len(self.points) == 8:
             return
+        new_points = [touch.x, touch.y]
+        self.points.extend(new_points)
+        self._display(new_points)
+
+    def quad_point_annotations(self):
+        return str(self.points)[1:-1]
+
+    def reset(self, p):
+        self.points = p
+        for cp in self.canvas_points:
+            self.canvas.remove(cp)
+        self.canvas_points = []
+        if len(p) > 0:
+            self._display(self.points)
+
+    def _display(self, points):
         with self.canvas:
             Color(0,0,0)
-            self.points.append((touch.x, touch.y))
-            Point(points=(touch.x, touch.y), pointsize=6)
-    def quad_points(self):
-        # returns flattened list of points
-        return list(sum(self.points, ()))
+            for i in range(0, len(points)-1,2):
+                x,y = points[i], points[i+1]
+                e = Ellipse(pos=(x-self.d/2,y-self.d/2), 
+                                             size=(self.d, self.d))
+                self.canvas_points.append(e)
 
 if __name__ == '__main__':
     parser = OptionParser()
